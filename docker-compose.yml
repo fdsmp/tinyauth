@@ -1,0 +1,29 @@
+services:
+  tinyauth:
+    image: ghcr.io/steveiliop56/tinyauth:v4
+    container_name: tinyauth
+    restart: unless-stopped
+    volumes:
+      - ./wallpaper.jpg:/data/resources/wallpaper.jpg:ro
+    networks:
+      - traefik_network  
+    environment:
+      - APP_URL=https://tinyauth.test.local
+      - APP_TITLE=netsyslab
+      - USERS=${USERS}
+      - SECRET=${SECRET}
+      - LOG_LEVEL=debug
+      - RESOURCES_DIR=/data/resources
+      - BACKGROUND_IMAGE=/resources/wallpaper.jpg
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tinyauth.entrypoints=websecure"
+      - "traefik.http.routers.tinyauth.rule=Host(`tinyauth.test.local`)"
+      - "traefik.http.routers.tinyauth.tls=true"
+      - "traefik.http.services.tinyauth.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.tinyauth.forwardauth.address=http://tinyauth:3000/api/auth/traefik"
+
+networks:
+  traefik_network:
+    external: true
+    
